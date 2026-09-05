@@ -1,0 +1,15 @@
+```gitignore
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Node
+node_modules/
+
+# Editor
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

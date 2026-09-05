@@ -1,0 +1,34 @@
+{
+  "name": "resource-optimizer-ui",
+  "version": "1.0.0",
+  "description": "Desktop UI for Resource Optimizer",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --debug",
+    "build": "electron-builder"
+  },
+  "keywords": ["system-monitor", "desktop", "electron"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "com.yourcompany.resourceoptimizer",
+    "productName": "Resource Optimizer",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "frontend/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "frontend/assets/icon.ico"
+    }
+  }
+}
