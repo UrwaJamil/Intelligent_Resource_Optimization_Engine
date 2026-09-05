@@ -77,6 +77,6 @@ optimizer.py → applies optimization logic
 app.py → runs backend services
 
 👩‍💻 Author
-Ajwa Irfan
-GitHub: https://github.com/Ajwa-Irfan
-LinkedIn: https://www.linkedin.com/in/ajwa-irfan
+Urwa Jamil
+GitHub: https://github.com/UrwaJamil
+LinkedIn: www.linkedin.com/in/urwa-jamil-881454354
