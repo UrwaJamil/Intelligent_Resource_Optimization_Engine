@@ -8,12 +8,17 @@
     "dev": "electron . --debug",
     "build": "electron-builder"
   },
-  "keywords": ["system-monitor", "desktop", "electron"],
+  "keywords": [
+    "system-monitor",
+    "desktop",
+    "electron"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
     "electron": "^25.0.0",
-    "electron-builder": "^24.6.0"
+    "electron-builder": "^24.6.0",
+    "electron-reload": "^2.0.0-alpha.1"
   },
   "build": {
     "appId": "com.yourcompany.resourceoptimizer",

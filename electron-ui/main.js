@@ -1,6 +1,13 @@
 const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 
+// Hot reload for development only — never runs in a packaged/production build
+if (!app.isPackaged) {
+  require('electron-reload')(path.join(__dirname, 'frontend'), {
+    electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
+  });
+}
+
 let mainWindow;
 
 function createWindow() {

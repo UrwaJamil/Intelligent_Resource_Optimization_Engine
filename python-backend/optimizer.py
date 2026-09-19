@@ -122,13 +122,24 @@ class SystemOptimizer:
         except Exception as e:
             return {"success": False, "message": f"Failed to kill process: {str(e)}"}
     
-    def clear_temp_files(self, temp_dir):
-        """Clear temporary files"""
+    def clear_temp_files(self, temp_dir, max_files=300, max_seconds=3):
+        """Clear temporary files.
+
+        Bounded on two axes so a huge/slow TEMP folder can never hang the
+        request: stops after `max_files` files checked, and stops after
+        `max_seconds` of wall-clock time, returning whatever was cleared so far.
+        """
         cleared = 0
+        scanned = 0
+        start_time = time.time()
         try:
             # Simple temp file cleanup
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
+                    if scanned >= max_files or (time.time() - start_time) > max_seconds:
+                        return cleared
+                    scanned += 1
+
                     if file.endswith('.tmp') or file.endswith('.log'):
                         try:
                             file_path = os.path.join(root, file)
@@ -136,9 +147,10 @@ class SystemOptimizer:
                             if os.path.getmtime(file_path) < time.time() - (7 * 24 * 3600):
                                 os.remove(file_path)
                                 cleared += 1
-                        except:
+                        except Exception:
+                            # Permission denied, file in use, etc. — skip and keep going
                             pass
                 break  # Only first level
-        except:
+        except Exception:
             pass
         return cleared

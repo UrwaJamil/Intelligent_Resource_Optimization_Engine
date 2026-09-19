@@ -19,13 +19,13 @@ class SystemAnalyzer:
             
             if process['cpu_percent'] > 70 or process['memory_percent'] > 70:
                 tags.append("critical")
-                status = "🔴 Critical"
+                status = "Critical"
             elif process['cpu_percent'] > 30 or process['memory_percent'] > 30:
                 tags.append("heavy")
-                status = "🟡 Warning"
+                status = "Warning"
             else:
                 tags.append("normal")
-                status = "🟢 Normal"
+                status = "Normal"
             
             # System or user process
             if process.get('user', '').lower() == 'system':

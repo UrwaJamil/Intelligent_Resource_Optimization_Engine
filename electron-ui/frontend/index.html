@@ -62,15 +62,15 @@
                 <div class="card-header"><h3><i class="fas fa-cogs"></i> Optimization</h3></div>
                 <div class="card-body">
                     <button class="optimize-btn boost" id="boostBtn">
-                        <i class="fas fa-bolt"></i><span>🚀 Boost Performance</span>
+                        <span><i class="fas fa-bolt"></i> Boost Performance</span>
                         <p class="btn-desc">Optimizes CPU and system resources</p>
                     </button>
                     <button class="optimize-btn memory" id="memoryBtn">
-                        <i class="fas fa-broom"></i><span>🧹 Free Up Memory</span>
+                        <span><i class="fas fa-broom"></i> Free Up Memory</span>
                         <p class="btn-desc">Cleans RAM and system cache</p>
                     </button>
                     <button class="optimize-btn balance" id="balanceBtn">
-                        <i class="fas fa-balance-scale"></i><span>⚖️ Balance Load</span>
+                        <span><i class="fas fa-balance-scale"></i> Balance Load</span>
                         <p class="btn-desc">Distributes resources evenly</p>
                     </button>
                     <div class="quick-stats">
@@ -82,12 +82,11 @@
 
             <!-- Auto-Optimization -->
             <div class="card rules-card">
-                <div class="card-header"><h3><i class="fas fa-robot"></i> Auto-Optimization</h3></div>
+                <div class="card-header">
+                    <h3><i class="fas fa-robot"></i> Auto-Optimization</h3>
+                    <label class="switch"><input type="checkbox" id="autoOptimize"><span class="slider"></span></label>
+                </div>
                 <div class="card-body">
-                    <div class="rule-setting">
-                        <div class="rule-label"><i class="fas fa-power-off"></i> Auto-Optimize</div>
-                        <label class="switch"><input type="checkbox" id="autoOptimize"><span class="slider"></span></label>
-                    </div>
                     <div class="rule-setting">
                         <div class="rule-label"><i class="fas fa-thermometer-half"></i> CPU Threshold</div>
                         <div class="threshold-control">
@@ -133,13 +132,43 @@
                 </div>
             </div>
 
+            <!-- Intelligent Priority Analyzer -->
+            <div class="card full-width priority-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-brain"></i> Intelligent Priority Analyzer</h3>
+                </div>
+                <div class="card-body">
+                    <div class="priority-counters">
+                        <div class="priority-counter critical">
+                            <div class="priority-counter-value" id="priorityCriticalCount">0</div>
+                            <div class="priority-counter-label"><i class="fas fa-skull-crossbones"></i> Critical</div>
+                        </div>
+                        <div class="priority-counter warning">
+                            <div class="priority-counter-value" id="priorityWarningCount">0</div>
+                            <div class="priority-counter-label"><i class="fas fa-exclamation-triangle"></i> Warning</div>
+                        </div>
+                        <div class="priority-counter safe">
+                            <div class="priority-counter-value" id="prioritySafeCount">0</div>
+                            <div class="priority-counter-label"><i class="fas fa-check-circle"></i> Safe to End</div>
+                        </div>
+                    </div>
+                    <div class="priority-recommendations">
+                        <h4><i class="fas fa-lightbulb"></i> Top Recommendations</h4>
+                        <div id="priorityRecommendations" class="priority-rec-list">
+                            <div class="priority-empty">Loading process analysis...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Process Manager -->
             <div class="card full-width process-card">
                 <div class="card-header">
                     <h3><i class="fas fa-list"></i> Process Manager</h3>
                     <div class="process-controls">
-                        <button class="refresh-btn" id="refreshProcesses"><i class="fas fa-redo"></i> Refresh</button>
                         <input type="text" id="processSearch" placeholder="Search processes..." class="search-input">
+                        <span class="update-status">Every <span id="updateInterval">2s</span> &middot; Updated <span id="lastUpdated">--:--:--</span></span>
+                        <button class="refresh-btn" id="refreshProcesses"><i class="fas fa-redo"></i></button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -154,16 +183,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-right">
-                    <p><i class="fas fa-chart-bar"></i> Update: <span id="updateInterval">2s</span></p>
-                    <p><i class="fas fa-database"></i> Last Updated: <span id="lastUpdated">--:--:--</span></p>
-                </div>
-            </div>
-        </footer>
     </div>
 
     <!-- Notifications -->

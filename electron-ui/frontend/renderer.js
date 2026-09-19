@@ -81,13 +81,13 @@ class ResourceOptimizerApp {
                 datasets: [{
                     label: 'CPU Usage',
                     data: [],
-                    borderColor: '#4facfe',
-                    backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                    borderColor: '#8EC9F8',
+                    backgroundColor: 'rgba(142, 201, 248, 0.1)',
                     borderWidth: 2,
                     tension: 0.3,
                     fill: true,
                     pointRadius: 2,
-                    pointBackgroundColor: '#4facfe',
+                    pointBackgroundColor: '#8EC9F8',
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 1
                 }]
@@ -176,13 +176,13 @@ class ResourceOptimizerApp {
                 datasets: [{
                     label: 'Memory Usage',
                     data: [],
-                    borderColor: '#ff6b6b',
-                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    borderColor: '#F69494',
+                    backgroundColor: 'rgba(246, 148, 148, 0.1)',
                     borderWidth: 2,
                     tension: 0.3,
                     fill: true,
                     pointRadius: 2,
-                    pointBackgroundColor: '#ff6b6b',
+                    pointBackgroundColor: '#F69494',
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 1
                 }]
@@ -281,6 +281,11 @@ class ResourceOptimizerApp {
 
     async updateAllData() {
         try {
+            // Process table/Priority Analyzer have their own error handling and
+            // DOM updates, so run them alongside the metrics fetch instead of
+            // blocking one on the other.
+            this.updateProcessTable();
+
             // Get system metrics
             const metricsResponse = await fetch(`${API_BASE_URL}/api/system-metrics`);
             if (!metricsResponse.ok) throw new Error('Failed to fetch system metrics');
@@ -347,12 +352,12 @@ class ResourceOptimizerApp {
 
         let status = 'Normal';
         let statusClass = 'normal';
-        let color = '#51cf66';
+        let color = '#85DB9F';
 
         if (cpu > 90 || memory > 90) {
             status = 'Critical';
             statusClass = 'critical';
-            color = '#ff6b6b';
+            color = '#F69494';
         } else if (cpu > 80 || memory > 85) {
             status = 'Warning';
             statusClass = 'warning';
@@ -404,13 +409,18 @@ class ResourceOptimizerApp {
     async updateProcessTable() {
         try {
             const tableBody = document.getElementById('processTableBody');
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="loading-text">
-                        <i class="fas fa-spinner fa-spin"></i> Loading processes...
-                    </td>
-                </tr>
-            `;
+            // Only show the loading placeholder on the very first load — on
+            // later refreshes, keep the existing rows until new data arrives
+            // so the table doesn't flicker back to "Loading..." each cycle.
+            if (this.processes.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="loading-text">
+                            <i class="fas fa-spinner fa-spin"></i> Loading processes...
+                        </td>
+                    </tr>
+                `;
+            }
 
             const response = await fetch(`${API_BASE_URL}/api/processes`);
             if (!response.ok) throw new Error('Failed to fetch processes');
@@ -420,6 +430,7 @@ class ResourceOptimizerApp {
             if (result.success && result.processes.length > 0) {
                 this.processes = result.processes;
                 this.renderProcessTable(this.processes);
+                this.updatePriorityAnalyzer(this.processes);
             } else {
                 tableBody.innerHTML = `
                     <tr>
@@ -448,19 +459,41 @@ class ResourceOptimizerApp {
         if (!tableBody) return;
 
         let html = '';
-        processes.slice(0, 20).forEach(process => {
+        processes.forEach(process => {
             const cpu = parseFloat(process.cpu_percent || 0);
             const mem = parseFloat(process.memory_percent || 0);
             const pid = process.pid || 'N/A';
             const name = process.name || 'Unknown';
-            const status = process.status || 'running';
 
-            const cpuClass = cpu > 70 ? 'process-critical' :
-                cpu > 30 ? 'process-warning' : 'process-normal';
-            const memClass = mem > 70 ? 'process-critical' :
-                mem > 30 ? 'process-warning' : 'process-normal';
-            const statusBadge = cpu > 70 || mem > 70 ? 'critical' :
-                cpu > 30 || mem > 30 ? 'warning' : 'normal';
+            // Categorization comes from the backend (analyzer.py's tags),
+            // not recalculated here, so there's one source of truth.
+            // The label is built from statusBadge rather than trusting the
+            // backend's own status string, so the badge's dot (::before in
+            // CSS) is always the only dot rendered — nothing from the
+            // backend text can ever add a second one next to it.
+            const tags = process.tags || [];
+            const statusBadge = tags.includes('critical') ? 'critical' :
+                tags.includes('heavy') ? 'warning' : 'normal';
+            const status = statusBadge.charAt(0).toUpperCase() + statusBadge.slice(1);
+
+            const cpuClass = `process-${statusBadge}`;
+            const memClass = `process-${statusBadge}`;
+
+            const protectedNames = [
+                'system', 'system idle process', 'svchost.exe', 'lsass.exe',
+                'services.exe', 'registry', 'csrss.exe', 'wininit.exe',
+                'smss.exe', 'winlogon.exe', 'msmpeng.exe',
+                'dwm.exe', 'fontdrvhost.exe', 'dllhost.exe', 'conhost.exe',
+                'taskhostw.exe', 'sihost.exe', 'ctfmon.exe', 'explorer.exe',
+                'spoolsv.exe', 'wlanext.exe', 'audiodg.exe'
+            ];
+            const isProtected = protectedNames.includes(name.toLowerCase());
+            const canEnd = statusBadge !== 'critical' && !isProtected;
+
+            const endButtonHtml = canEnd ? `
+                            <button class="action-btn kill-btn" onclick="app.killProcess(${pid}, '${name.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-skull-crossbones"></i> End
+                            </button>` : '';
 
             html += `
                 <tr>
@@ -471,9 +504,7 @@ class ResourceOptimizerApp {
                     <td><span class="status-badge ${statusBadge}">${status}</span></td>
                     <td>
                         <div class="process-actions">
-                            <button class="action-btn kill-btn" onclick="app.killProcess(${pid}, '${name.replace(/'/g, "\\'")}')">
-                                <i class="fas fa-skull-crossbones"></i> End
-                            </button>
+                            ${endButtonHtml}
                             <button class="action-btn details-btn" onclick="app.showProcessDetails(${pid})">
                                 <i class="fas fa-info-circle"></i> Details
                             </button>
@@ -484,6 +515,52 @@ class ResourceOptimizerApp {
         });
 
         tableBody.innerHTML = html;
+    }
+
+    updatePriorityAnalyzer(processes) {
+        const criticalEl = document.getElementById('priorityCriticalCount');
+        const warningEl = document.getElementById('priorityWarningCount');
+        const safeEl = document.getElementById('prioritySafeCount');
+        const listEl = document.getElementById('priorityRecommendations');
+        if (!criticalEl || !warningEl || !safeEl || !listEl) return;
+
+        // Same backend tags/can_kill used for the process table, so the
+        // counters can never disagree with what the table is showing.
+        const critical = processes.filter(p => (p.tags || []).includes('critical'));
+        const heavy = processes.filter(p => (p.tags || []).includes('heavy'));
+        const safeToEnd = processes.filter(p => p.can_kill && !(p.tags || []).includes('critical'));
+
+        criticalEl.textContent = critical.length;
+        warningEl.textContent = heavy.length;
+        safeEl.textContent = safeToEnd.length;
+
+        const notable = [...critical, ...heavy]
+            .sort((a, b) => (parseFloat(b.cpu_percent || 0) + parseFloat(b.memory_percent || 0)) -
+                            (parseFloat(a.cpu_percent || 0) + parseFloat(a.memory_percent || 0)))
+            .slice(0, 5);
+
+        if (notable.length === 0) {
+            listEl.innerHTML = `<div class="priority-empty">No heavy or critical processes right now.</div>`;
+            return;
+        }
+
+        listEl.innerHTML = notable.map(p => {
+            const canPause = p.can_kill && !(p.tags || []).includes('critical');
+            const tagClass = canPause ? 'pausable' : 'protected';
+            const tagText = canPause ? 'Can be paused' : 'Protected';
+            const cpu = parseFloat(p.cpu_percent || 0).toFixed(1);
+            const mem = parseFloat(p.memory_percent || 0).toFixed(1);
+
+            return `
+                <div class="priority-rec-item">
+                    <div class="priority-rec-info">
+                        <span class="priority-rec-name"><i class="fas fa-cube"></i> ${p.name || 'Unknown'}</span>
+                        <span class="priority-rec-detail">${p.status || ''} · CPU ${cpu}% · Mem ${mem}%</span>
+                    </div>
+                    <span class="priority-tag ${tagClass}">${tagText}</span>
+                </div>
+            `;
+        }).join('');
     }
 
     async killProcess(pid, name) {
@@ -532,8 +609,11 @@ class ResourceOptimizerApp {
             this.showNotification('Refreshed', 'System data updated', 'info');
         });
 
-        document.getElementById('refreshProcesses').addEventListener('click', () => {
-            this.updateProcessTable();
+        document.getElementById('refreshProcesses').addEventListener('click', async () => {
+            const icon = document.querySelector('#refreshProcesses i');
+            if (icon) icon.classList.add('spinning');
+            await this.updateProcessTable();
+            if (icon) icon.classList.remove('spinning');
         });
 
         // Optimization buttons

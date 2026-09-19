@@ -30,14 +30,7 @@ async def get_system_metrics():
     """Real-time CPU, Memory, Disk, Network data"""
     try:
         metrics = monitor.get_system_info()
-        
-        # Heavy processes count calculate karo
-        heavy_count = 0
-        processes = monitor.get_processes()
-        for proc in processes[:50]:  # First 50 processes check karo
-            if proc.get('cpu_percent', 0) > 30 or proc.get('memory_percent', 0) > 30:
-                heavy_count += 1
-        
+
         return JSONResponse(content={
             "success": True,
             "cpu": metrics["cpu"],
@@ -46,20 +39,25 @@ async def get_system_metrics():
             "uptime": metrics["uptime"],
             "platform": metrics["platform"],
             "timestamp": metrics["timestamp"],
-            "heavy_processes_count": heavy_count  # ✅ YEH ADD KARO
+            "heavy_processes_count": metrics["heavy_processes_count"]
         })
     except Exception as e:
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)
 
 @app.get("/api/processes")
-async def get_processes():
-    """Get all running processes"""
+async def get_processes(limit: int = 50):
+    """Get running processes, sorted by CPU usage.
+
+    limit: max processes to return (default 50). Pass limit=0 to return
+    every process, or an explicit value to override the default.
+    """
     try:
         processes = monitor.get_processes()
         analyzed = analyzer.analyze_processes(processes)
+        result = analyzed if limit <= 0 else analyzed[:limit]
         return JSONResponse(content={
             "success": True,
-            "processes": analyzed[:50]  # First 50 processes
+            "processes": result
         })
     except Exception as e:
         return JSONResponse(content={"success": False, "error": str(e)}, status_code=500)

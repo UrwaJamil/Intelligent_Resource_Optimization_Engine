@@ -49,7 +49,7 @@ body {
 
 .logo h1 { 
     font-size: 2.4rem; 
-    background: linear-gradient(to right, #fff, #ffd700); 
+    background: linear-gradient(to right, #fff, #F5DF74); 
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
@@ -73,7 +73,7 @@ body {
     width: 12px; 
     height: 12px; 
     border-radius: 50%; 
-    background: #51cf66; 
+    background: #85DB9F; 
     animation: pulse 2s infinite; 
 }
 
@@ -86,7 +86,7 @@ body {
     text-align: center; 
     font-size: 1.2rem; 
     font-weight: bold; 
-    color: #ffd700; 
+    color: #F5DF74; 
 }
 
 /* Dashboard */
@@ -127,12 +127,67 @@ body {
     border-bottom: 2px solid rgba(255,255,255,0.1); 
 }
 
-.card-header h3 { 
-    font-size: 1.4rem; 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
-    color: #ffd700; 
+.card-header h3 {
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #F5DF74;
+}
+
+/* Toggle switch (e.g. Auto-Optimization on/off) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch .slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 26px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.switch .slider::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    bottom: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.switch input:checked + .slider {
+    background: #F5DF74;
+    border-color: #F5DF74;
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(24px);
+}
+
+.switch input:focus-visible + .slider {
+    outline: 2px solid #F5DF74;
+    outline-offset: 2px;
 }
 
 .refresh-btn {
@@ -149,9 +204,20 @@ body {
     transition: all 0.3s ease;
 }
 
-.refresh-btn:hover { 
-    background: rgba(255,255,255,0.2); 
-    transform: rotate(180deg); 
+.refresh-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: rotate(180deg);
+}
+
+/* Applied only via JS (class "spinning") while a refresh is in flight —
+   never present by default, so the icon is static until clicked. */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
 }
 
 /* Metrics */
@@ -168,14 +234,14 @@ body {
 }
 
 .metric-label i { 
-    color: #4facfe; 
+    color: #8EC9F8; 
 }
 
 .metric-value { 
     font-size: 2.2rem; 
     font-weight: bold; 
     margin-bottom: 10px; 
-    background: linear-gradient(to right, #fff, #4facfe); 
+    background: linear-gradient(to right, #fff, #8EC9F8); 
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
@@ -195,7 +261,7 @@ body {
 }
 
 #cpuBar { 
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+    background: linear-gradient(135deg, #8EC9F8 0%, #86F0FD 100%); 
     width: 0%; 
 }
 
@@ -206,21 +272,22 @@ body {
 
 /* Buttons */
 .optimize-btn {
-    width: 100%; 
-    padding: 18px; 
-    border: none; 
-    border-radius: 15px; 
-    color: white; 
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 15px;
     font-weight: bold;
-    cursor: pointer; 
-    transition: all 0.3s ease; 
-    margin-bottom: 15px; 
-    display: flex; 
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+    display: flex;
     flex-direction: column;
-    align-items: flex-start; 
-    gap: 8px; 
-    position: relative; 
+    align-items: flex-start;
+    gap: 8px;
+    position: relative;
     overflow: hidden;
+    /* text color/shadow are set per gradient below (.boost/.memory/.balance),
+       since the pastel backgrounds need dark text instead of white */
 }
 
 .optimize-btn::before {
@@ -245,27 +312,47 @@ body {
     gap: 10px; 
 }
 
-.optimize-btn i { 
-    font-size: 1.3rem; 
+.optimize-btn i {
+    font-size: 1.3rem;
 }
 
-.btn-desc { 
-    font-size: 0.9rem; 
-    opacity: 0.8; 
-    font-weight: normal; 
-    text-align: left; 
+/* Icons stay vibrant/colorful even though title & description text are
+   dark for readability on the pastel backgrounds */
+.boost i {
+    color: #7c3fd6;
 }
 
-.boost { 
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+.memory i {
+    color: #e0356e;
 }
 
-.memory { 
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+.balance i {
+    color: #11998e;
 }
 
-.balance { 
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); 
+.btn-desc {
+    font-size: 0.9rem;
+    color: #47465f;
+    font-weight: 600;
+    text-align: left;
+}
+
+.boost, .memory, .balance {
+    /* Pastel backgrounds are light, so dark text/icons read clearly
+       without needing a text-shadow (unlike the old bright gradients). */
+    color: #33324a;
+}
+
+.boost {
+    background: linear-gradient(135deg, #B4B3F3 0%, #A187CD 100%);
+}
+
+.memory {
+    background: linear-gradient(135deg, #F5B9E6 0%, #EC8CA1 100%);
+}
+
+.balance {
+    background: linear-gradient(135deg, #98EEBC 0%, #77E3C6 100%);
 }
 
 .optimize-btn:hover { 
@@ -326,7 +413,7 @@ body {
     text-align: center;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #4facfe;
+    color: #8EC9F8;
     margin-top: 10px;
     padding-top: 8px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -357,6 +444,49 @@ body {
 
 /* ==================== END CHARTS FIX ==================== */
 
+/* Process Manager controls */
+.process-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    max-width: 50%;
+    margin-left: auto;
+}
+
+.process-controls .refresh-btn {
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.update-status {
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #8EC9F8;
+    background: rgba(255, 255, 255, 0.12);
+}
+
 /* Tables */
 .table-container { 
     overflow-x: auto; 
@@ -378,7 +508,7 @@ body {
     padding: 15px; 
     text-align: left; 
     font-weight: 600; 
-    color: #ffd700; 
+    color: #F5DF74; 
     border-bottom: 2px solid rgba(255,255,255,0.1); 
 }
 
@@ -387,18 +517,165 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.05); 
 }
 
-#processTable tbody tr:hover { 
-    background: rgba(255,255,255,0.05); 
+#processTable tbody tr:hover {
+    background: rgba(255,255,255,0.05);
 }
 
-.loading-text { 
+/* Status badge — a CSS-drawn dot instead of a colored emoji, so it can
+   actually be recolored to match the rest of the app's palette */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.status-badge::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-badge.critical {
+    color: #F69494;
+}
+
+.status-badge.critical::before {
+    background: #F69494;
+}
+
+.status-badge.warning {
+    color: #f6d365;
+}
+
+.status-badge.warning::before {
+    background: #f6d365;
+}
+
+.status-badge.normal {
+    color: #85DB9F;
+}
+
+.status-badge.normal::before {
+    background: #85DB9F;
+}
+
+.loading-text {
     text-align: center; 
     padding: 40px !important; 
-    color: #4facfe; 
+    color: #8EC9F8; 
 }
 
 .loading-text i { 
     margin-right: 10px; 
+}
+
+/* Intelligent Priority Analyzer */
+.priority-counters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.priority-counter {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 18px;
+    text-align: center;
+}
+
+.priority-counter-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.priority-counter-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+.priority-counter.critical .priority-counter-value { color: #F69494; }
+.priority-counter.warning .priority-counter-value { color: #f6d365; }
+.priority-counter.safe .priority-counter-value { color: #85DB9F; }
+
+.priority-recommendations h4 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #F5DF74;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.priority-rec-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.priority-rec-item {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 12px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.priority-rec-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.priority-rec-name {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.priority-rec-detail {
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.priority-tag {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.priority-tag.pausable {
+    background: rgba(133, 219, 159, 0.2);
+    color: #85DB9F;
+    border: 1px solid rgba(133, 219, 159, 0.4);
+}
+
+.priority-tag.protected {
+    background: rgba(246, 148, 148, 0.2);
+    color: #F69494;
+    border: 1px solid rgba(246, 148, 148, 0.4);
+}
+
+.priority-empty {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.7;
 }
 
 /* Notifications */
@@ -418,7 +695,7 @@ body {
     backdrop-filter: blur(20px);
     border-radius: 10px;
     padding: 15px;
-    border-left: 4px solid #4facfe;
+    border-left: 4px solid #8EC9F8;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -427,11 +704,11 @@ body {
 }
 
 .notification.success {
-    border-left-color: #51cf66;
+    border-left-color: #85DB9F;
 }
 
 .notification.error {
-    border-left-color: #ff6b6b;
+    border-left-color: #F69494;
 }
 
 .notification.warning {
@@ -461,10 +738,18 @@ body {
     .dashboard { 
         grid-template-columns: 1fr; 
     }
-    .card-header { 
-        flex-direction: column; 
-        gap: 15px; 
-        align-items: flex-start; 
+    .card-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    .process-controls {
+        max-width: 100%;
+        width: 100%;
+        margin-left: 0;
+    }
+    .update-status {
+        display: none;
     }
     .logo h1 { 
         font-size: 1.8rem; 

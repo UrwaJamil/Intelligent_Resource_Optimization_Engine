@@ -10,18 +10,14 @@ class SystemMonitor:
     def get_system_info(self):
         """Get real-time system metrics with robust error handling"""
         try:
-            # Get CPU usage with retry logic
+            # Get CPU usage — non-blocking (delta since the last call),
+            # never interval=X, which would sleep for X seconds per request
             cpu_percent = 0
             try:
-                # First try with interval
-                cpu_percent = psutil.cpu_percent(interval=0.3)
+                cpu_percent = psutil.cpu_percent(interval=None)
             except Exception as cpu_err:
-                print(f"CPU interval error: {cpu_err}")
-                try:
-                    # Fallback to immediate reading
-                    cpu_percent = psutil.cpu_percent(interval=None)
-                except:
-                    cpu_percent = 0
+                print(f"CPU error: {cpu_err}")
+                cpu_percent = 0
             
             # Get Memory usage
             memory_percent = 0
@@ -72,10 +68,11 @@ class SystemMonitor:
                 # Try to get actual process count
                 process_count = len(psutil.pids())
                 
-                # Count heavy processes (CPU > 10%)
+                # Count heavy processes (CPU > 30% — same threshold used app-wide,
+                # see optimizer.py's balance_load() and analyzer.py's "heavy" tag)
                 for proc in psutil.process_iter(['pid', 'name', 'cpu_percent']):
                     try:
-                        if proc.info['cpu_percent'] and proc.info['cpu_percent'] > 10:
+                        if proc.info['cpu_percent'] and proc.info['cpu_percent'] > 30:
                             heavy_processes_count += 1
                     except:
                         continue
@@ -123,7 +120,7 @@ class SystemMonitor:
             try:
                 # Get at least platform info
                 return {
-                    "cpu": psutil.cpu_percent(interval=0.1) if hasattr(psutil, 'cpu_percent') else 0,
+                    "cpu": psutil.cpu_percent(interval=None) if hasattr(psutil, 'cpu_percent') else 0,
                     "memory": psutil.virtual_memory().percent if hasattr(psutil, 'virtual_memory') else 0,
                     "process_count": len(psutil.pids()) if hasattr(psutil, 'pids') else 0,
                     "heavy_processes_count": 0,
